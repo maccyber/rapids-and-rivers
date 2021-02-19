@@ -157,7 +157,7 @@ class RapidApplication internal constructor(
                     rapidTopic = env.getValue("KAFKA_RAPID_TOPIC"),
                     extraTopics = env["KAFKA_EXTRA_TOPIC"]?.split(',')?.map(String::trim) ?: emptyList(),
                     kafkaConfig = KafkaConfig(
-                        bootstrapServers = env.getValue("KAFKA_BOOTSTRAP_SERVERS"),
+                        bootstrapServers = getConfig(env, "KAFKA_BROKERS", "KAFKA_BOOTSTRAP_SERVERS"),
                         consumerGroupId = env.getValue("KAFKA_CONSUMER_GROUP_ID"),
                         clientId = instanceId,
                         username = "/var/run/secrets/nais.io/service_user/username".readFile(),
@@ -173,6 +173,15 @@ class RapidApplication internal constructor(
                     ),
                     httpPort = env["HTTP_PORT"]?.toInt() ?: 8080
                 )
+            }
+
+            private fun getConfig(env: Map<String, String>, aivenKey: String, onPremKey: String): String {
+                val useOnPrem = env["DISABLE_AIVEN"]?.let { it.toLowerCase() == "true"} ?: false
+                if(!useOnPrem){
+                    val value = env[aivenKey]
+                    if(value != null) return value
+                }
+                return env.getValue(onPremKey)
             }
 
             private fun generateInstanceId(env: Map<String, String>): String {
