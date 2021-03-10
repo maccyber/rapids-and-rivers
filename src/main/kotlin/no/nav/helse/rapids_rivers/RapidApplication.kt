@@ -43,12 +43,12 @@ class RapidApplication internal constructor(
         ktor.stop(1000, 1000)
     }
 
-    override fun publish(message: String) {
-        rapid.publish(message)
+    override fun publish(message: String): () -> Unit {
+        return rapid.publish(message)
     }
 
-    override fun publish(key: String, message: String) {
-        rapid.publish(key, message)
+    override fun publish(key: String, message: String): () -> Unit {
+        return rapid.publish(key, message)
     }
 
     private fun shutdownHook() {

@@ -10,12 +10,14 @@ class InMemoryRapid(private val ktor: ApplicationEngine) : RapidsConnection() {
     private val messagesSendt = mutableListOf<RapidMessage>()
     val outgoingMessages get() = messagesSendt.toList()
 
-    override fun publish(message: String) {
+    override fun publish(message: String): () -> Unit {
         messagesSendt.add(RapidMessage(null, message))
+        return {  }
     }
 
-    override fun publish(key: String, message: String) {
+    override fun publish(key: String, message: String): () -> Unit {
         messagesSendt.add(RapidMessage(key, message))
+        return {  }
     }
 
     override fun start() {
@@ -28,12 +30,14 @@ class InMemoryRapid(private val ktor: ApplicationEngine) : RapidsConnection() {
 
     fun sendToListeners(message: String) {
         val context = object: MessageContext {
-            override fun publish(message: String) {
+            override fun publish(message: String): () -> Unit {
                 this@InMemoryRapid.publish(message)
+                return {  }
             }
 
-            override fun publish(key: String, message: String) {
+            override fun publish(key: String, message: String): () -> Unit {
                 this@InMemoryRapid.publish(key, message)
+                return {  }
             }
         }
 

@@ -25,12 +25,14 @@ class TestRapid : RapidsConnection() {
         listeners.forEach { it.onMessage(message, this) }
     }
 
-    override fun publish(message: String) {
+    override fun publish(message: String): () -> Unit {
         messages.add(null to message)
+        return {}
     }
 
-    override fun publish(key: String, message: String) {
+    override fun publish(key: String, message: String): () -> Unit {
         messages.add(key to message)
+        return {}
     }
 
     override fun start() {}

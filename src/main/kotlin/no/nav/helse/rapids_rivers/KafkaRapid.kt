@@ -47,14 +47,14 @@ class KafkaRapid(
     fun isRunning() = running.get()
     fun isReady() = isRunning() && ready.get()
 
-    override fun publish(message: String) {
+    override fun publish(message: String): () -> Unit {
         check(!producerClosed.get()) { "can't publish messages when producer is closed" }
-        producer.send(ProducerRecord(rapidTopic, message))
+        return producer.send(ProducerRecord(rapidTopic, message)).let { { it.get().let {  } } }
     }
 
-    override fun publish(key: String, message: String) {
+    override fun publish(key: String, message: String): () -> Unit {
         check(!producerClosed.get()) { "can't publish messages when producer is closed" }
-        producer.send(ProducerRecord(rapidTopic, key, message))
+        return producer.send(ProducerRecord(rapidTopic, key, message)).let { { it.get().let {  } } }
     }
 
     override fun start() {
@@ -173,13 +173,13 @@ class KafkaRapid(
         private val record: ConsumerRecord<String, String>,
         private val rapidsConnection: RapidsConnection
     ) : MessageContext {
-        override fun publish(message: String) {
+        override fun publish(message: String): () -> Unit {
             if (record.key() == null) return rapidsConnection.publish(message)
-            publish(record.key(), message)
+            return publish(record.key(), message)
         }
 
-        override fun publish(key: String, message: String) {
-            rapidsConnection.publish(key, message)
+        override fun publish(key: String, message: String): () -> Unit {
+            return rapidsConnection.publish(key, message)
         }
     }
 

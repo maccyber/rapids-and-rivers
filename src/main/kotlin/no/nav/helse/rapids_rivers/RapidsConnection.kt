@@ -1,8 +1,8 @@
 package no.nav.helse.rapids_rivers
 
 interface MessageContext {
-    fun publish(message: String)
-    fun publish(key: String, message: String)
+    fun publish(message: String): () -> Unit
+    fun publish(key: String, message: String): () -> Unit
 }
 
 abstract class RapidsConnection : MessageContext {
